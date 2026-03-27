@@ -31,6 +31,10 @@ const userSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        role: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+        },
         status: {
             type: String,
             enum: ['ACTIVE', 'SUSPENDED'],
