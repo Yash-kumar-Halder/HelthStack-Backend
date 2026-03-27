@@ -35,6 +35,10 @@ const userSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             required: true,
         },
+        isRoleProfileCreated: {
+            type: Boolean,
+            default: false,
+        },
         status: {
             type: String,
             enum: ['ACTIVE', 'SUSPENDED'],
