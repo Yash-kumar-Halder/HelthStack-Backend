@@ -1,46 +1,59 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
-const validateEmail = function (email) {
-    const re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-    return re.test(email);
-};
+const userSchema = new mongoose.Schema(
+    {
+        name: {
+            type: String,
+            required: true,
+        },
+        email: {
+            type: String,
+            required: 'Email address is required',
+            unique: true,
+            trim: true,
+            lowercare: true,
+            match: [
+                /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                'Please fill a valid email address',
+            ],
+        },
+        password: {
+            type: String,
+            required: 'Password is required',
+            select: false,
+        },
+        phone: {
+            type: String,
+            required: 'Phone number is required',
+            unique: true,
+        },
+        isVerified: {
+            type: Boolean,
+            default: false,
+        },
+        status: {
+            type: String,
+            enum: ['ACTIVE', 'SUSPENDED'],
+            default: 'ACTIVE',
+        },
+        varificationToken: {
+            type: String,
+            select: false,
+        },
+        varificationTokenExpireAt: {
+            type: Date,
+            select: false,
+        },
+        refreshToken: {
+            type: String,
+            select: false,
+        },
+        refreshTokenExpireAt: {
+            type: Date,
+            select: false,
+        },
+    },
+    { timestamps: true },
+);
 
-const userSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-    },
-    email: {
-        type: String,
-        required: "Email address is required",
-        unique: true,
-        trim: true,
-        lowercare: true,
-        validate: [validateEmail, "Please fill a valid email address"],
-        match: [
-            /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-            "Please fill a valid email address",
-        ],
-    },
-    password: {
-        type: String,
-        required: "Password is required",
-    },
-    phone: {
-        type: String,
-        required: "Phone number is required",
-        unique: true
-    },
-    isVerified: {
-        type: Boolean,
-        default: false,
-    },
-    status: {
-        type: String,
-        enum: ["ACTIVE", "SUSPENDED"],
-        default: "ACTIVE"
-    },
-
-}, {timestamps: true});
-
-export const User = mongoose.models.User || mongoose.model("User", userSchema);
+export const User = mongoose.models.User || mongoose.model('User', userSchema);
