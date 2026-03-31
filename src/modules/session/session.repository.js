@@ -1,7 +1,7 @@
 import { SessionModel } from './session.model';
 
 export class SessionRepository {
-    async create(data) {
+    async createSession(data) {
         return await SessionModel.create(data);
     }
     async findSession({ userId, token, userAgent }) {
@@ -12,10 +12,9 @@ export class SessionRepository {
             expireAt: { $gt: new Date() },
         });
     }
-    async findAllSession({ userId, token }) {
+    async findAllSession({ userId }) {
         return await SessionModel.findOne({
             user: userId,
-            token,
             expireAt: { $gt: new Date() },
         });
     }
