@@ -7,6 +7,11 @@ export class RoleRepostory {
             description,
         });
     }
+
+    async findById(roleId) {
+        return (await RoleModel.findById(roleId)) || null;
+    }
+
     async deleteRoleById(roleId) {
         return await RoleModel.findByIdAndDelete(roleId);
     }
