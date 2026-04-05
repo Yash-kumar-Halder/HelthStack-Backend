@@ -1,6 +1,8 @@
 import UserRepository from './user.repository.js';
 import ApiError from '../../common/utils/api/api-error.js';
 import bcrypt from 'bcrypt';
+import { RefreshToken } from '../../common/utils/token/refresh-token.js';
+import { RoleModel } from '../role/role.model.js';
 
 export class UserService {
     constructor() {
@@ -22,6 +24,14 @@ export class UserService {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = bcrypt.hash(password, salt);
 
+        const roleDb = await RoleModel.findOne({
+            name: String(name).toUpperCase(),
+        });
+
+        if (!roleDb) {
+            return ApiError.badRequest('Invalid role');
+        }
+
         const newUser = await this.UserRepository.create({
             name,
             email,
@@ -29,9 +39,6 @@ export class UserService {
             phone,
             role,
         });
-
-        // Return new user with access token
+        return newUser;
     }
-
-    async;
 }
