@@ -2,6 +2,7 @@ import { AccessToken } from '../../common/utils/token/access-token.js';
 import crypto from 'crypto';
 import { SessionService } from '../session/session.service.js';
 import { UserService } from '../user/user.service.js';
+import bcrypt from 'bcrypt';
 
 export class AuthService {
     static async register(data) {
@@ -20,6 +21,7 @@ export class AuthService {
         const tokenId = crypto.randomUUID();
 
         const rawToken = crypto.randomBytes(40).toString('hex');
+        const hashedToken = await bcrypt.hash(rawToken, 10);
 
         const refreshToken = `${tokenId}.${rawToken}`;
 
@@ -28,7 +30,7 @@ export class AuthService {
         await SessionService.createSession({
             user: user._id,
             tokenId,
-            token: refreshToken,
+            token: hashedToken,
             tokenExpireAt: expireAt,
             ipAddress,
             userAgent,
