@@ -1,4 +1,4 @@
-import { SessionModel } from './session.model';
+import { SessionModel } from './session.model.js';
 
 export class SessionRepository {
     async createSession(data) {

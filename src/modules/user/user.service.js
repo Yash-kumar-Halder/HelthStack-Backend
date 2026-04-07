@@ -1,7 +1,6 @@
-import UserRepository from './user.repository.js';
-import ApiError from '../../common/utils/api/api-error.js';
+import { UserRepository } from './user.repository.js';
+import { ApiError } from '../../common/utils/api/api-error.js';
 import bcrypt from 'bcrypt';
-import { RefreshToken } from '../../common/utils/token/refresh-token.js';
 import { RoleModel } from '../role/role.model.js';
 
 export class UserService {

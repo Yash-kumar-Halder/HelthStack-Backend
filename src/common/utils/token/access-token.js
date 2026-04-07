@@ -1,7 +1,8 @@
 import jwt from 'jsonwebtoken';
 
 export class AccessToken {
-    generateAccessToken(data, expireIn) {
+    static generateAccessToken(data, expireIn) {
+        console.log(process.env.JWT_SECRET);
         return jwt.sign(data, process.env.JWT_SECRET, {
             algorithm: 'HS256',
             expiresIn: expireIn,
