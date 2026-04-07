@@ -5,6 +5,12 @@ const SessionSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     },
+    tokenId: {
+        type: String,
+        required: true,
+        unique: true,
+        index: true,
+    },
     token: {
         type: String,
         required: true,
