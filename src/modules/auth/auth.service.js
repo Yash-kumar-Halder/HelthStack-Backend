@@ -7,7 +7,7 @@ import bcrypt from 'bcrypt';
 export class AuthService {
     static async register(data) {
         const user = await UserService.createUser(data);
-        return user;
+        return this._generateAuthResponse(user);
     }
 
     static async _generateAuthResponse(user, meta = {}) {
