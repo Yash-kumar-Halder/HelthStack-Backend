@@ -10,6 +10,28 @@ export class AuthService {
         return this._generateAuthResponse(user);
     }
 
+    static async login({ email, password }, meta = {}) {
+        const { ipAddress = null, userAgent = null } = meta;
+
+        // 1. Find user
+        const user = await UserService.findByEmail(email);
+        if (!user) {
+            throw new Error('Invalid credentials');
+        }
+
+        // 2. Compare password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            throw new Error('Invalid credentials');
+        }
+
+        // 4. Generate tokens + session
+        return this._generateAuthResponse(user, {
+            ipAddress,
+            userAgent,
+        });
+    }
+
     static async _generateAuthResponse(user, meta = {}) {
         const { ipAddress = null, userAgent = null } = meta;
         const accessToken = AccessToken.generateAccessToken(
