@@ -1,7 +1,7 @@
 import { SessionModel } from './session.model.js';
 
 export class SessionRepository {
-    async createSession(data) {
+    static async createSession(data) {
         return await SessionModel.create(data);
     }
     async findSession({ userId, token, userAgent }) {

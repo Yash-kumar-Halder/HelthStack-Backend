@@ -8,7 +8,7 @@ export class UserService {
         this.UserRepository = new UserRepository();
     }
 
-    async createUser({ name, email, password, phone, role }) {
+    static async createUser({ name, email, password, phone, role }) {
         const existUserWithEmail = await this.UserRepository.findByEmail(email);
         if (existUserWithEmail) {
             throw ApiError.badRequest('User already exist with this email');
