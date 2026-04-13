@@ -1,42 +1,41 @@
-import { UserRepository } from './user.repository.js';
 import { ApiError } from '../../common/utils/api/api-error.js';
 import bcrypt from 'bcrypt';
 import { RoleModel } from '../role/role.model.js';
+import { UserRepository } from './user.repository.js';
 
 export class UserService {
     constructor() {
-        this.UserRepository = new UserRepository();
+        this.userRepository = new UserRepository();
     }
 
-    static async createUser({ name, email, password, phone, role }) {
-        const existUserWithEmail = await this.UserRepository.findByEmail(email);
+    async createUser({ name, email, password, phone, role }) {
+        const existUserWithEmail = await this.userRepository.findByEmail(email);
         if (existUserWithEmail) {
             throw ApiError.badRequest('User already exist with this email');
         }
-        const existUserWithPhone = await this.UserRepository.findByPhone(phone);
+        const existUserWithPhone = await this.userRepository.findByPhone(phone);
         if (existUserWithPhone) {
             throw ApiError.badRequest(
                 'User already exist with this phone number',
             );
         }
 
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = bcrypt.hash(password, salt);
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         const roleDb = await RoleModel.findOne({
-            name: String(name).toUpperCase(),
+            name: String(role).toUpperCase(),
         });
 
         if (!roleDb) {
             return ApiError.badRequest('Invalid role');
         }
 
-        const newUser = await this.UserRepository.create({
+        const newUser = await this.userRepository.create({
             name,
             email,
             password: hashedPassword,
             phone,
-            role,
+            role: roleDb._id,
         });
         return newUser;
     }

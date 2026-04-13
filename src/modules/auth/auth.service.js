@@ -1,20 +1,24 @@
 import { AccessToken } from '../../common/utils/token/access-token.js';
 import crypto from 'crypto';
-import { SessionService } from '../session/session.service.js';
-import { UserService } from '../user/user.service.js';
 import bcrypt from 'bcrypt';
 
 export class AuthService {
-    static async register(data) {
-        const user = await UserService.createUser(data);
-        return this._generateAuthResponse(user);
+    constructor(userService, sessionService) {
+        this.userService = userService;
+        this.sessionService = sessionService;
     }
 
-    static async login({ email, password }, meta = {}) {
+    async register(data, meta = {}) {
+        const user = await this.userService.createUser(data);
+        console.log(user);
+        return this._generateAuthResponse(user, meta);
+    }
+
+    async login({ email, password }, meta = {}) {
         const { ipAddress = null, userAgent = null } = meta;
 
         // 1. Find user
-        const user = await UserService.findByEmail(email);
+        const user = await this.userService.findByEmail(email);
         if (!user) {
             throw new Error('Invalid credentials');
         }
@@ -32,10 +36,17 @@ export class AuthService {
         });
     }
 
-    static async _generateAuthResponse(user, meta = {}) {
+    async _generateAuthResponse(user, meta = {}) {
         const { ipAddress = null, userAgent = null } = meta;
+        const payload = {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            role: user.role,
+        };
         const accessToken = AccessToken.generateAccessToken(
-            user,
+            payload,
             15 * 60 * 1000,
         );
 
@@ -49,7 +60,7 @@ export class AuthService {
 
         const expireAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-        await SessionService.createSession({
+        await this.sessionService.createSession({
             user: user._id,
             tokenId,
             token: hashedToken,
