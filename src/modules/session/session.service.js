@@ -5,7 +5,7 @@ export class SessionService {
         this.SessionRepository = new SessionRepository();
     }
 
-    static async createSession(data) {
+    async createSession(data) {
         return await SessionRepository.createSession(data);
     }
 
