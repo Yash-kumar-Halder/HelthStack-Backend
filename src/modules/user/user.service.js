@@ -39,4 +39,7 @@ export class UserService {
         });
         return newUser;
     }
+    async findByEmail(email) {
+        return await this.userRepository.findByEmailWithPassword(email);
+    }
 }

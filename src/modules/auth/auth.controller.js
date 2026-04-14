@@ -13,4 +13,12 @@ export default class AuthController {
         const result = await this.authService.register(req.body, meta);
         return ApiResponse.created(res, 'User created successfully', result);
     });
+    login = asyncHandler(async (req, res) => {
+        const meta = {
+            ipAddress: req.ip,
+            userAgent: req.get('User-Agent'),
+        };
+        const result = await this.authService.login(req.body, meta);
+        return ApiResponse.ok(res, 'Login successfull', result);
+    });
 }
