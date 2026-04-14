@@ -1,6 +1,7 @@
 import { AccessToken } from '../../common/utils/token/access-token.js';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
+import { UserResponseDTO } from '../user/dto/user-response.dto.js';
 
 export class AuthService {
     constructor(userService, sessionService) {
@@ -70,7 +71,7 @@ export class AuthService {
         });
 
         return {
-            user,
+            user: new UserResponseDTO(user),
             accessToken,
             refreshToken,
             cookieOptions: {
