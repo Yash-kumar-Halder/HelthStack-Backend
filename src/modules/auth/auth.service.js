@@ -1,7 +1,8 @@
 import { AccessToken } from '../../common/utils/token/access-token.js';
-import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import { UserResponseDTO } from '../user/dto/user-response.dto.js';
+import { RefreshToken } from '../../common/utils/token/refresh-token.js';
+import { Hash } from '../../common/utils/token/hash.js';
 
 export class AuthService {
     constructor(userService, sessionService) {
@@ -11,7 +12,6 @@ export class AuthService {
 
     async register(data, meta = {}) {
         const user = await this.userService.createUser(data);
-        console.log(user);
         return this._generateAuthResponse(user, meta);
     }
 
@@ -46,29 +46,27 @@ export class AuthService {
             phone: user.phone,
             role: user.role,
         };
-        const accessToken = AccessToken.generateAccessToken(
-            payload,
-            15 * 60 * 1000,
-        );
+        const accessToken = AccessToken.generateAccessToken(payload, '15m');
 
         // Create tokenId for DB lookup
-        const tokenId = crypto.randomUUID();
-
-        const rawToken = crypto.randomBytes(40).toString('hex');
-        const hashedToken = await bcrypt.hash(rawToken, 10);
-
-        const refreshToken = `${tokenId}.${rawToken}`;
 
         const expireAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-        await this.sessionService.createSession({
+        const session = await this.sessionService.createSession({
             user: user._id,
-            tokenId,
-            token: hashedToken,
+            refreshTokenHash: null,
             tokenExpireAt: expireAt,
             ipAddress,
             userAgent,
         });
+
+        const refreshToken = await RefreshToken.generateRefreshToken(
+            { userId: user._id, sessionId: session._id },
+            '15d',
+        );
+
+        session.refreshTokenHash = await Hash.hash(refreshToken);
+        session.save();
 
         return {
             user: new UserResponseDTO(user),
