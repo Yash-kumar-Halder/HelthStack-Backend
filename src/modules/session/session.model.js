@@ -5,16 +5,10 @@ const SessionSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     },
-    tokenId: {
+    refreshTokenHash: {
         type: String,
         required: true,
-        unique: true,
-        index: true,
-    },
-    token: {
-        type: String,
-        required: true,
-        unique: true,
+        default: null,
     },
     tokenExpireAt: {
         type: Date,
@@ -28,7 +22,7 @@ const SessionSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    revoke: {
+    isRevoke: {
         type: Boolean,
         default: false,
     },
