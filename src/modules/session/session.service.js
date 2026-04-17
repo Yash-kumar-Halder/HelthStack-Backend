@@ -2,36 +2,32 @@ import { SessionRepository } from './session.repository.js';
 
 export class SessionService {
     constructor() {
-        this.SessionRepository = new SessionRepository();
+        this.sessionRepository = new SessionRepository();
     }
 
     async createSession(data) {
-        return await SessionRepository.createSession(data);
+        return await this.sessionRepository.createSession(data);
     }
 
-    async findSession({ userId, token, userAgent }) {
-        return await SessionRepository.findSession({
+    async getSessionById(sessionId) {
+        return await this.sessionRepository.findById(sessionId);
+    }
+
+    async getSessionByUserDevice(userId, userAgent) {
+        return await this.sessionRepository.findByUserAndAgent(
             userId,
-            token,
             userAgent,
-        });
+        );
     }
 
-    async findAllSession({ userId }) {
-        return await SessionRepository.findAllSession({ userId });
-    }
-
-    async deleteSession({ userId, token, userAgent }) {
-        return await SessionRepository.deleteSession({
+    async deleteSessionByUserDevice(userId, userAgent) {
+        return await this.sessionRepository.deleteByUserAndAgent(
             userId,
-            token,
             userAgent,
-        });
+        );
     }
 
-    async deleteAllSession({ userId }) {
-        return await SessionRepository.deleteAllSession({
-            userId,
-        });
+    async deleteAllSessions(userId) {
+        return await this.sessionRepository.deleteAll(userId);
     }
 }
