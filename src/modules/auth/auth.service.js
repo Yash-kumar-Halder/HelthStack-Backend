@@ -38,6 +38,60 @@ export class AuthService {
         });
     }
 
+    async refreshTokens(refreshToken, meta = {}) {
+        if (!refreshToken) {
+            throw new Error('Refresh token missing');
+        }
+
+        const { ipAddress = null, userAgent = null } = meta;
+
+        const decoded = RefreshToken.verifyRefreshToken(refreshToken);
+        const { sessionId } = decoded;
+
+        const session = await this.sessionService.getSessionById(sessionId);
+
+        if (
+            !session ||
+            session.isRevoked ||
+            session.tokenExpireAt < new Date()
+        ) {
+            throw new Error('Invalid or expired session');
+        }
+
+        const isValid = await Hash.compare(
+            refreshToken,
+            session.refreshTokenHash,
+        );
+
+        if (!isValid) {
+            session.isRevoked = true;
+            await session.save();
+            throw new Error('Refresh token reuse detected');
+        }
+
+        const newRefreshToken = RefreshToken.generateRefreshToken(
+            { userId: session.user, sessionId },
+            '7d',
+        );
+
+        const newAccessToken = AccessToken.generateAccessToken(
+            { _id: session.user },
+            '15m',
+        );
+
+        session.refreshTokenHash = await Hash.hash(newRefreshToken);
+        session.tokenExpireAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        session.ipAddress = ipAddress;
+        session.userAgent = userAgent;
+
+        await session.save();
+
+        return {
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken,
+        };
+    }
+
     async _generateAuthResponse(user, meta = {}) {
         const { ipAddress = null, userAgent = null } = meta;
 
@@ -86,7 +140,7 @@ export class AuthService {
                 secure: process.env.NODE_ENV === 'production',
                 sameSite:
                     process.env.NODE_ENV === 'production' ? 'Strict' : 'Lax',
-                path: '/auth/refresh',
+                path: '/api/auth',
                 maxAge: 7 * 24 * 60 * 60 * 1000,
             },
         };

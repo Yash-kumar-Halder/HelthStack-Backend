@@ -19,6 +19,24 @@ export default class AuthController {
             userAgent: req.get('User-Agent'),
         };
         const result = await this.authService.login(req.body, meta);
+        console.log(result.cookieOptions);
+        res.cookie('refreshToken', result.refreshToken, result.cookieOptions);
         return ApiResponse.ok(res, 'Login successfull', result);
+    });
+    refreshTokens = asyncHandler(async (req, res) => {
+        const refreshToken = req.cookies.refreshToken;
+
+        if (!refreshToken) {
+            throw new Error('Refresh token missing');
+        }
+
+        const meta = {
+            ipAddress: req.ip,
+            userAgent: req.get('User-Agent'),
+        };
+
+        const result = await this.authService.refreshTokens(refreshToken, meta);
+
+        return ApiResponse.ok(res, 'Tokens refreshed successfully', result);
     });
 }

@@ -2,11 +2,13 @@ import express from 'express';
 import dotenv from 'dotenv';
 import AuthRoutes from './src/modules/auth/auth.route.js';
 import errorHandler from './src/common/middleware/error-handler.js';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 app.get('/', (req, res) => {
