@@ -4,6 +4,7 @@ import { UserResponseDTO } from '../user/dto/user-response.dto.js';
 import { RefreshToken } from '../../common/utils/token/refresh-token.js';
 import { Hash } from '../../common/utils/token/hash.js';
 import { SessionModel } from '../session/session.model.js';
+import { ApiError } from '../../common/utils/api/api-error.js';
 
 export class AuthService {
     constructor(userService, sessionService) {
@@ -36,6 +37,12 @@ export class AuthService {
             ipAddress,
             userAgent,
         });
+    }
+    async logout({ sessionId, meta = {} }) {
+        if (!sessionId || !meta.userAgent) {
+            throw ApiError.badRequest('Session not found.');
+        }
+        return await this.sessionService.revokeSessionById(sessionId);
     }
 
     async refreshTokens(refreshToken, meta = {}) {
@@ -95,16 +102,6 @@ export class AuthService {
     async _generateAuthResponse(user, meta = {}) {
         const { ipAddress = null, userAgent = null } = meta;
 
-        const payload = {
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            phone: user.phone,
-            role: user.role,
-        };
-
-        const accessToken = AccessToken.generateAccessToken(payload, '15m');
-
         const expireAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
         // delete old session for this device
@@ -130,6 +127,17 @@ export class AuthService {
         // hash + save
         session.refreshTokenHash = await Hash.hash(refreshToken);
         await session.save();
+
+        const payload = {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            role: user.role,
+            sessionId: session._id,
+        };
+
+        const accessToken = AccessToken.generateAccessToken(payload, '15m');
 
         return {
             user: new UserResponseDTO(user),
