@@ -27,6 +27,10 @@ export class SessionService {
         );
     }
 
+    async revokeSessionById(userId) {
+        return await this.sessionRepository.deleteAll(userId);
+    }
+
     async deleteAllSessions(userId) {
         return await this.sessionRepository.deleteAll(userId);
     }

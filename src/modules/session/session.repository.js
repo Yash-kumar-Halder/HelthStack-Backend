@@ -17,6 +17,16 @@ export class SessionRepository {
         return await SessionModel.deleteOne({ user: userId, userAgent });
     }
 
+    async deleteOne(sessionId) {
+        return await SessionModel.deleteOne({ _id: sessionId });
+    }
+    async revokeSessionById(sessionId) {
+        return await SessionModel.findByIdAndUpdate(
+            sessionId,
+            { revoke: true },
+            { new: true },
+        );
+    }
     async deleteAll(userId) {
         return await SessionModel.deleteMany({ user: userId });
     }
